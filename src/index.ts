@@ -92,6 +92,8 @@ function convertMessages(
         role: msg.role,
         content: msg.content
       });
+    } else {
+      console.error(`Warning: Unsupported message role "${msg.role}" - skipping message`);
     }
   }
   
@@ -137,6 +139,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         max_tokens: args.max_tokens || 4096,
         temperature: args.temperature || 1.0,
       });
+
+      // Validate response structure
+      if (!completion.choices || completion.choices.length === 0) {
+        throw new Error("No response choices returned from API");
+      }
 
       const response = completion.choices[0]?.message?.content || "";
 
