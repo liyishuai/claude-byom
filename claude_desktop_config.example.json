@@ -1,30 +1,72 @@
+# Example Claude Desktop Configuration
+
+## Configuration Location
+
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+## Basic Configuration
+
+Point Claude Desktop to use the claude-byom proxy:
+
+```json
 {
+  "environmentVariables": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:3000",
+    "ANTHROPIC_API_KEY": "any-value-works"
+  }
+}
+```
+
+## Important Notes
+
+1. The `ANTHROPIC_API_KEY` can be any value - it's not used by the proxy
+2. The `ANTHROPIC_BASE_URL` should point to where your claude-byom proxy is running
+3. Make sure the proxy server is running before starting Claude Desktop
+4. Restart Claude Desktop completely after changing the configuration
+
+## Different Port
+
+If you're running the proxy on a different port:
+
+```json
+{
+  "environmentVariables": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:3001",
+    "ANTHROPIC_API_KEY": "any-value-works"
+  }
+}
+```
+
+## Using localhost instead of 127.0.0.1
+
+Some systems prefer localhost:
+
+```json
+{
+  "environmentVariables": {
+    "ANTHROPIC_BASE_URL": "http://localhost:3000",
+    "ANTHROPIC_API_KEY": "any-value-works"
+  }
+}
+```
+
+## Complete Example with MCP Servers
+
+If you also have MCP servers configured, combine them:
+
+```json
+{
+  "environmentVariables": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:3000",
+    "ANTHROPIC_API_KEY": "any-value-works"
+  },
   "mcpServers": {
-    "claude-byom-openai": {
-      "command": "node",
-      "args": ["/absolute/path/to/claude-byom/build/index.js"],
-      "env": {
-        "OPENAI_API_KEY": "sk-your-openai-api-key-here",
-        "OPENAI_MODEL": "gpt-4"
-      }
-    },
-    "claude-byom-ollama": {
-      "command": "node",
-      "args": ["/absolute/path/to/claude-byom/build/index.js"],
-      "env": {
-        "OPENAI_API_KEY": "ollama",
-        "OPENAI_BASE_URL": "http://localhost:11434/v1",
-        "OPENAI_MODEL": "llama2"
-      }
-    },
-    "claude-byom-together": {
-      "command": "node",
-      "args": ["/absolute/path/to/claude-byom/build/index.js"],
-      "env": {
-        "OPENAI_API_KEY": "your-together-api-key-here",
-        "OPENAI_BASE_URL": "https://api.together.xyz/v1",
-        "OPENAI_MODEL": "mistralai/Mixtral-8x7B-Instruct-v0.1"
-      }
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/workspace"]
     }
   }
 }
+```

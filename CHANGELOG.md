@@ -8,32 +8,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2025-12-26
 
 ### Added
-- Initial release of claude-byom MCP server
-- MCP server implementation wrapping OpenAI-compatible APIs
+- Initial release of claude-byom HTTP proxy server
+- HTTP proxy that translates Anthropic API calls to OpenAI-compatible format
 - Support for any OpenAI-compatible LLM provider (OpenAI, Ollama, Together AI, Azure, etc.)
-- Message format conversion from Anthropic to OpenAI format
-- `chat` tool for sending messages and receiving responses
+- Full Anthropic API v1/messages endpoint compatibility
+- Streaming response support with Server-Sent Events (SSE)
+- Non-streaming response support
+- Message format conversion:
+  - Anthropic messages → OpenAI chat completions
+  - OpenAI responses → Anthropic message format
 - Configuration via environment variables:
   - `OPENAI_API_KEY` - API key for OpenAI-compatible service
   - `OPENAI_BASE_URL` - Custom base URL for alternative providers
   - `OPENAI_MODEL` - Model selection
-- Support for optional parameters:
+  - `PORT` - Proxy server port (default: 3000)
+  - `HOST` - Bind host (default: 127.0.0.1)
+- Support for Anthropic API parameters:
   - System prompts
   - Temperature control
   - Max tokens configuration
+  - Top-p sampling
+  - Streaming toggle
+- Health check endpoint at `/health`
 - Comprehensive documentation:
   - README with detailed setup instructions
-  - Quick Start Guide for fast onboarding
+  - Quick Start Guide with step-by-step examples
   - Contributing guidelines
-  - Example configurations for multiple providers
-- Automated testing suite
-- Error handling and validation
+  - Security policy
+  - Example Claude Desktop configurations for multiple providers
 - TypeScript support with strict mode
-- Build system with npm scripts
+- Express-based HTTP server
+- Real-time API format translation
+- Usage statistics in responses
+- Error handling with Anthropic-compatible error format
 
 ### Security
-- No known vulnerabilities (validated with CodeQL)
+- Server binds to localhost (127.0.0.1) by default
+- No vulnerabilities detected (CodeQL validated)
 - Proper error handling for API failures
-- Input validation for message roles and API responses
+- Input validation for requests
+- Secure API key handling
 
 [1.0.0]: https://github.com/liyishuai/claude-byom/releases/tag/v1.0.0
