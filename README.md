@@ -2,6 +2,10 @@
 
 **Bring Your Own Model** - An MCP server that wraps OpenAI-compatible LLM providers into an Anthropic-compatible interface for use with Claude Code and other MCP clients.
 
+## 🚀 Quick Start
+
+New to claude-byom? Check out the [Quick Start Guide](QUICKSTART.md) for step-by-step setup instructions.
+
 ## Overview
 
 This Model Context Protocol (MCP) server allows you to use any OpenAI-compatible LLM provider (like OpenAI, Azure OpenAI, Together AI, Ollama, LM Studio, etc.) with Claude Code by wrapping the OpenAI API into an Anthropic-compatible interface.
