@@ -22,7 +22,7 @@ const openai = new OpenAI({
 });
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
@@ -30,9 +30,19 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 // Anthropic message format
+interface ContentBlock {
+  type: string;
+  text?: string;
+  source?: {
+    type: string;
+    media_type?: string;
+    data?: string;
+  };
+}
+
 interface AnthropicMessage {
   role: 'user' | 'assistant';
-  content: string | Array<{ type: string; text?: string; source?: any }>;
+  content: string | ContentBlock[];
 }
 
 interface AnthropicRequest {
@@ -46,7 +56,7 @@ interface AnthropicRequest {
 }
 
 // Convert Anthropic content to string
-function extractTextContent(content: string | Array<{ type: string; text?: string }>): string {
+function extractTextContent(content: string | ContentBlock[]): string {
   if (typeof content === 'string') {
     return content;
   }
@@ -166,7 +176,16 @@ app.post('/v1/messages', async (req: Request, res: Response) => {
       })}\n\n`);
       
       let fullText = '';
+      let inputTokens = 0;
+      let outputTokens = 0;
+      
       for await (const chunk of stream) {
+        // Validate chunk structure
+        if (!chunk.choices || chunk.choices.length === 0) {
+          console.error('Warning: Received chunk without choices');
+          continue;
+        }
+        
         const delta = chunk.choices[0]?.delta?.content || '';
         if (delta) {
           fullText += delta;
@@ -176,6 +195,12 @@ app.post('/v1/messages', async (req: Request, res: Response) => {
             delta: { type: 'text_delta', text: delta }
           })}\n\n`);
         }
+        
+        // Track usage if available
+        if (chunk.usage) {
+          inputTokens = chunk.usage.prompt_tokens || 0;
+          outputTokens = chunk.usage.completion_tokens || 0;
+        }
       }
       
       // Send content_block_stop
@@ -184,11 +209,11 @@ app.post('/v1/messages', async (req: Request, res: Response) => {
         index: 0
       })}\n\n`);
       
-      // Send message_delta with usage
+      // Send message_delta with usage (use actual tokens if available, otherwise estimate)
       res.write(`event: message_delta\ndata: ${JSON.stringify({
         type: 'message_delta',
         delta: { stop_reason: 'end_turn', stop_sequence: null },
-        usage: { output_tokens: fullText.split(' ').length }
+        usage: { output_tokens: outputTokens || Math.ceil(fullText.length / 4) }
       })}\n\n`);
       
       // Send message_stop
